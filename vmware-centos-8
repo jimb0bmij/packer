@@ -1,0 +1,74 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server":      "{{ item.vcenter_hostname }}",
+      "username":            "{{ vcenter_username }}",
+      "password":            "{{ vcenter_password }}",
+      "insecure_connection": "true",
+      "vm_name": "{{item.vm_name}}",
+      "notes": "{{ item.notes }}",
+      "datacenter": "{{ item.datacenter }}",
+      "cluster": "{{ item.cluster }}",
+      "host": "{{ item.host }}",
+      "datastore": "{{ item.datastore }}",
+      "network": "{{ item.network }}",
+
+      "guest_os_type": "{{ item.guest_os_type }}",
+      "vm_version": "{{ vmware_hw }}",
+
+      "ssh_username": "root",
+      "ssh_password": "{{rootpass}}",
+
+      "CPUs":             1,
+      "RAM":              4096,
+      "RAM_reserve_all": false,
+
+      "convert_to_template": "{{ vmtemplate }}",
+      "create_snapshot": false,
+
+      "disk_controller_type":  "pvscsi",
+      "disk_size":        100000,
+      "disk_thin_provisioned": true,
+
+      "network_card": "vmxnet3",
+
+      "http_directory": "{{ appbuildir }}",
+
+      "iso_paths": [
+       "{{ item.iso }}"
+      ],
+
+
+      "boot_command": "<up><wait><tab> inst.text inst.repo=cdrom inst.ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/{{ item.ks }}<wait><enter><wait>"
+          }
+],
+
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "./build-linux-systems/packer.yml",
+      "extra_arguments": [ "--extra-vars", "tz=US/Central" ]
+    },
+
+
+    {
+      "type": "shell",
+      "inline": ["echo 'template build - starting inspec'"]
+    },
+
+
+    {
+      "type": "inspec",
+      "profile": "inspec/linux-baseline/",
+      "extra_arguments": ["--no-distinct-exit", "--reporter", "cli", "html:{{item.vm_name}}_inspec.html"]
+    }
+
+ ]
+
+
+
+
+
+}
