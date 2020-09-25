@@ -1,0 +1,53 @@
+{
+  "variables": {
+    "vm_name": "centos81-packer",
+    "cpus": "2",
+    "memory": "1024",
+    "disk_size": "100000",
+	"ks": "ks-centos-81.cfg",
+	"ssh_pass": "",
+    "iso_url": "\\\\windowsserver.com\\share\\ISO\\",
+	"iso_image": "CentOS-8-x86_64-DVD-1905.iso",
+	"iso_image_dir": "d:/Packer-ISO/",
+    "iso_checksum": "sha256:ea17ef71e0df3f6bf1d4bf1fc25bec1a76d1f211c115d39618fe688be34503e8"
+  },
+  "builders": [
+    {
+      "vm_name": "{{user `vm_name`}}",
+      "type": "hyperv-iso",
+      "disk_size": "{{user `disk_size`}}",
+      "guest_additions_mode": "disable",
+      "iso_url": "{{user `iso_url`}}{{user `iso_image`}}",
+	  "iso_checksum": "{{user `iso_checksum`}}",
+	  "iso_target_path": "{{user `iso_image_dir`}}{{user `iso_image`}}",
+      "communicator": "ssh",
+      "ssh_username": "root",
+      "ssh_password": "{{user `ssh_pass`}}",
+      "ssh_timeout": "4h",
+      "http_directory": "./",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<up><wait2>e<wait><down><wait><down><wait><end> inst.text inst.repo=cdrom inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{ user `ks` }}<wait><leftCtrlOn>X<leftCtrlOff><wait>"
+      ],
+      "memory": "{{user `memory`}}",
+      "cpus": "{{user `cpus`}}",
+      "generation": 2,
+      "enable_secure_boot": false,
+	  "skip_export": true,
+	  "output_directory": "d:/Virtual Machines/{{user `vm_name`}}",
+	  "shutdown_command": "echo '{{user `ssh_pass`}}' | sudo -S -E shutdown -P now"	 
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
